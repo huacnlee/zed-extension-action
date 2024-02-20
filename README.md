@@ -20,6 +20,7 @@ jobs:
       - uses: huacnlee/zed-extension-action@v1
         with:
           extension-name: my_extension
+          push-to: your-name/extensions
         env:
           # the personal access token should have "repo" & "workflow" scopes
           COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}

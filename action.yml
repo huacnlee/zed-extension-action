@@ -22,6 +22,8 @@ inputs:
   zed-extensions:
     description: The repository where the extension should be updated
     default: zed-industries/extensions
+  push-to:
+    description: An existing fork of the homebrew-tap repository where the edit should be pushed to (defaults to creating or reusing a personal fork)
 branding:
   icon: box
   color: orange
