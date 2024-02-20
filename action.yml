@@ -1,0 +1,27 @@
+name: bump-zed-extension
+description: "Bump Zed Extension after a new release"
+author: "@huacnlee"
+runs:
+  using: node20
+  main: "./lib/index.js"
+inputs:
+  extension-name:
+    description: The name of the Zed Extension (defaults to lower-cased repository name)
+  extension-path:
+    description: The path to the Zed Extension in zed/extensions repo (defaults to `extensions/<extension-name>`)
+  tag-name:
+    description: The git tag name to bump the formula to (defaults to the currently pushed tag)
+  commit-message:
+    description: The git commit message template to use when updating the formula
+    default: |
+      {{extensionName}} {{version}}
+
+      Created by https://github.com/huacnlee/zed-extension-action
+  create-pullrequest:
+    description: Set to a boolean value to either force or prohibit making a pull request to zed/extensions
+  zed-extensions:
+    description: The repository where the extension should be updated
+    default: zed/extensions
+branding:
+  icon: box
+  color: orange
