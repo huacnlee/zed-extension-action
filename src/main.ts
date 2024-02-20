@@ -96,6 +96,8 @@ export async function prepareEdit(
   replacements.set("version", version);
 
   const commitMessage = commitForRelease(messageTemplate, {
+    owner: ctx.repo.owner,
+    repo: ctx.repo.repo,
     extensionName,
     version,
   });
