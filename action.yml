@@ -21,7 +21,7 @@ inputs:
     description: Set to a boolean value to either force or prohibit making a pull request to zed/extensions
   zed-extensions:
     description: The repository where the extension should be updated
-    default: zed/extensions
+    default: zed-industries/extensions
 branding:
   icon: box
   color: orange

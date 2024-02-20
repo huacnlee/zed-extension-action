@@ -9,11 +9,12 @@ Create a `release.yml` file in `.github/workflows` directory with the following 
 ```yml
 on:
   push:
-    tags: 'v*'
+    tags:
+      - "v*"
 
 jobs:
   homebrew:
-    name: Release Zed Extensions
+    name: Release Zed Extension
     runs-on: ubuntu-latest
     steps:
       - uses: huacnlee/zed-extension-action@v1
