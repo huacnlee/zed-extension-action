@@ -4,25 +4,7 @@ import editGitHubBlob from "./edit_github_blob";
 import { EditOptions } from "./edit_github_blob";
 import { removeRevisionLine, updateVersion } from "./replace_extension_toml";
 import { context } from "@actions/github";
-
-function getExtensionPath(extensionName: string): string {
-  return `extensions/${extensionName}`;
-}
-
-export function commitForRelease(
-  messageTemplate: string,
-  params: { [key: string]: string } = {},
-): string {
-  return messageTemplate.replace(
-    /\{\{(\w+)\}\}/g,
-    (m: string, key: string): string => {
-      if (Object.hasOwnProperty.call(params, key)) {
-        return params[key];
-      }
-      return m;
-    },
-  );
-}
+import { commitForRelease, getExtensionPath } from "./utils";
 
 export default async function (api: (token: string) => API): Promise<void> {
   const internalToken =

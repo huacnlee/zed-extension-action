@@ -165,7 +165,7 @@ export default async function (params: EditOptions): Promise<string> {
       path: extensionPath,
       message: `Update ${extensionPath} submodule to ${params.commitSha}`,
       content: "",
-      sha: submoduleSha,
+      sha: params.commitSha,
       branch: headBranch,
     });
   }
