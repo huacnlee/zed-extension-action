@@ -111,6 +111,7 @@ export async function prepareEdit(
     commitMessage,
     pushTo,
     makePR,
+    commitSha: ctx.sha,
     replace(oldContent: string) {
       return removeRevisionLine(
         updateVersion(oldContent, extensionName, version),

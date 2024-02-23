@@ -31,6 +31,7 @@ export type EditOptions = {
   extensionPath: string;
   branch?: string;
   apiClient: API;
+  commitSha: string;
   replace: (oldContent: string) => string;
   commitMessage?: string;
   pushTo?: {
@@ -136,6 +137,38 @@ export default async function (params: EditOptions): Promise<string> {
     sha: fileData.sha,
     branch: headBranch,
   });
+
+  // Update extensions/extensionPath submodule to the latest commit
+  // https://api.github.com/repos/huacnlee/zed-extensions/contents/extensions/macos-classic
+  const submoduleRes = await api.repos.getContent({
+    ...headRepo,
+    path: extensionPath,
+    ref: headBranch,
+  });
+  const submoduleData = submoduleRes.data;
+  if (Array.isArray(submoduleData)) {
+    throw new Error(
+      `expected '${extensionPath}' is a submodule, got a directory`,
+    );
+  }
+  if (submoduleData.type !== "submodule") {
+    throw new Error(
+      `expected '${extensionPath}' is a submodule, got a ${submoduleData.type}`,
+    );
+  }
+
+  const submoduleSha = submoduleData.sha;
+  if (params.commitSha !== submoduleSha) {
+    // Update submodule
+    await api.repos.createOrUpdateFileContents({
+      ...headRepo,
+      path: extensionPath,
+      message: `Update ${extensionPath} submodule to ${params.commitSha}`,
+      content: "",
+      sha: submoduleSha,
+      branch: headBranch,
+    });
+  }
 
   if (needsBranch && params.makePR !== false) {
     const parts = commitMessage.split("\n\n");
