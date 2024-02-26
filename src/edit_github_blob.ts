@@ -1,5 +1,6 @@
 import type { API } from "./api";
 import { basename } from "path";
+import { updateRepo } from "./github";
 
 // avoid importing @octokit/request-error to not have to keep it in sync in package.json
 interface RequestError {
@@ -129,46 +130,17 @@ export default async function (params: EditOptions): Promise<string> {
   const commitMessage = params.commitMessage
     ? params.commitMessage
     : `Update ${extensionPath}`;
-  const commitRes = await api.repos.createOrUpdateFileContents({
-    ...headRepo,
-    path: "extensions.toml",
-    message: commitMessage,
-    content: Buffer.from(newContent).toString("base64"),
-    sha: fileData.sha,
-    branch: headBranch,
-  });
 
-  // Update extensions/extensionPath submodule to the latest commit
-  // https://api.github.com/repos/huacnlee/zed-extensions/contents/extensions/macos-classic
-  const submoduleRes = await api.repos.getContent({
-    ...headRepo,
-    path: extensionPath,
-    ref: headBranch,
+  await updateRepo({
+    octokit: params.apiClient,
+    owner: headRepo.owner,
+    repo: headRepo.repo,
+    headBranch,
+    newContent,
+    commitMessage,
+    submoduleNewSha: params.commitSha,
+    extensionPath,
   });
-  const submoduleData = submoduleRes.data;
-  if (Array.isArray(submoduleData)) {
-    throw new Error(
-      `expected '${extensionPath}' is a submodule, got a directory`,
-    );
-  }
-  if (submoduleData.type !== "submodule") {
-    throw new Error(
-      `expected '${extensionPath}' is a submodule, got a ${submoduleData.type}`,
-    );
-  }
-
-  const submoduleSha = submoduleData.sha;
-  if (params.commitSha !== submoduleSha) {
-    // Update submodule
-    await api.repos.createOrUpdateFileContents({
-      ...headRepo,
-      path: extensionPath,
-      message: `Update ${extensionPath} submodule to ${params.commitSha}`,
-      content: "",
-      sha: params.commitSha,
-      branch: headBranch,
-    });
-  }
 
   if (needsBranch && params.makePR !== false) {
     const parts = commitMessage.split("\n\n");
@@ -184,6 +156,6 @@ export default async function (params: EditOptions): Promise<string> {
     });
     return prRes.data.html_url;
   } else {
-    return commitRes.data.commit.html_url || "";
+    return "";
   }
 }
