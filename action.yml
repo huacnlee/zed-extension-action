@@ -18,7 +18,7 @@ inputs:
 
       Release notes:
 
-      https://github.com/{{owner}}/{{repo}}/releases/tag/{{version}}
+      https://github.com/{{owner}}/{{repo}}/releases/tag/v{{version}}
 
       > Created by [zed-extension-action](https://github.com/huacnlee/zed-extension-action).
   create-pullrequest:
