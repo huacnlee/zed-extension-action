@@ -32,7 +32,7 @@ export type EditOptions = {
   extensionPath: string;
   branch?: string;
   apiClient: API;
-  commitSha: string;
+  submoduleCommitSha: string;
   replace: (oldContent: string) => string;
   commitMessage?: string;
   pushTo?: {
@@ -108,7 +108,7 @@ export default async function (params: EditOptions): Promise<string> {
     });
   }
 
-  // Update extensions.toml
+  // Get extensions.toml data and replace to newContent
   const fileRes = await api.repos.getContent({
     ...headRepo,
     path: "extensions.toml",
@@ -138,7 +138,7 @@ export default async function (params: EditOptions): Promise<string> {
     headBranch,
     newContent,
     commitMessage,
-    submoduleNewSha: params.commitSha,
+    submoduleNewSha: params.submoduleCommitSha,
     extensionPath,
   });
 

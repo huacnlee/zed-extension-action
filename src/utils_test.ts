@@ -4,7 +4,7 @@ import { commitForRelease } from "./utils";
 test("commitForRelease", () => {
   expect(
     commitForRelease(
-      "https://github.com/{{owner}}/{{repp}}/releases/tag/{{tag}}",
+      "Hello world {{owner}}/{{repp}} {{tag}}\n\nhttps://github.com/{{owner}}/{{repp}}/releases/tag/{{tag}}",
       {
         owner: "huacnlee",
         repp: "zed-theme-macos-classic",
@@ -12,6 +12,6 @@ test("commitForRelease", () => {
       },
     ),
   ).toEqual(
-    "https://github.com/huacnlee/zed-theme-macos-classic/releases/tag/v0.1.2",
+    "Hello world huacnlee/zed-theme-macos-classic v0.1.2\n\nhttps://github.com/huacnlee/zed-theme-macos-classic/releases/tag/v0.1.2",
   );
 });

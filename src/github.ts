@@ -1,6 +1,4 @@
-import { Octokit } from "@octokit/core";
-import api, { API } from "./api";
-import { basename } from "path";
+import { API } from "./api";
 
 export async function createCommit(
   octokit: API,
@@ -104,10 +102,10 @@ export async function updateRepo(options: {
         sha: submoduleNewSha,
       },
       {
-        path: "extension.toml",
+        path: "extensions.toml",
         mode: "100644",
         type: "blob",
-        content: Buffer.from(newContent).toString("base64"),
+        content: newContent,
       },
     ],
   });

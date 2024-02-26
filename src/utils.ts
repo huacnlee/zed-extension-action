@@ -6,7 +6,7 @@ export function commitForRelease(
   params: { [key: string]: string } = {},
 ): string {
   return messageTemplate.replace(
-    /\{\{(\w+)\}\}/g,
+    /\{\{(\w+)\}\}/gm,
     (m: string, key: string): string => {
       if (Object.hasOwnProperty.call(params, key)) {
         return params[key];

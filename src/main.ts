@@ -11,26 +11,12 @@ export default async function (api: (token: string) => API): Promise<void> {
     process.env.GITHUB_TOKEN || process.env.COMMITTER_TOKEN || "";
   const externalToken = process.env.COMMITTER_TOKEN || "";
 
-  const options = await prepareEdit(
-    context,
-    api(internalToken),
-    api(externalToken),
-  );
+  const options = await prepareEdit(api(internalToken), api(externalToken));
   const createdUrl = await editGitHubBlob(options);
   console.log(createdUrl);
 }
 
-type Context = {
-  ref: string;
-  sha: string;
-  repo: {
-    owner: string;
-    repo: string;
-  };
-};
-
 export async function prepareEdit(
-  ctx: Context,
   _sameRepoClient: API,
   crossRepoClient: API,
 ): Promise<EditOptions> {
@@ -39,7 +25,7 @@ export async function prepareEdit(
     ((ref) => {
       if (!ref.startsWith("refs/tags/")) throw `invalid ref: ${ref}`;
       return ref.replace("refs/tags/", "");
-    })(ctx.ref);
+    })(context.ref);
 
   const [owner, repo] = getInput("zed-extensions", { required: true }).split(
     "/",
@@ -61,7 +47,7 @@ export async function prepareEdit(
     pushTo = context.repo;
   }
   const extensionName =
-    getInput("extension-name") || ctx.repo.repo.toLowerCase();
+    getInput("extension-name") || context.repo.repo.toLowerCase();
   const branch = getInput("base-branch");
   const extensionPath =
     getInput("extension-path") || getExtensionPath(extensionName);
@@ -77,9 +63,11 @@ export async function prepareEdit(
   const replacements = new Map<string, string>();
   replacements.set("version", version);
 
+  console.log("context", context);
+
   const commitMessage = commitForRelease(messageTemplate, {
-    owner: ctx.repo.owner,
-    repo: ctx.repo.repo,
+    owner: context.repo.owner,
+    repo: context.repo.repo,
     extensionName,
     version,
   });
@@ -93,7 +81,7 @@ export async function prepareEdit(
     commitMessage,
     pushTo,
     makePR,
-    commitSha: ctx.sha,
+    submoduleCommitSha: context.sha,
     replace(oldContent: string) {
       return removeRevisionLine(
         updateVersion(oldContent, extensionName, version),
