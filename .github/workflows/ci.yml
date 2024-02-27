@@ -12,4 +12,4 @@ jobs:
         run: bun install
       - name: Test
         run: |
-          bun run test
+          bun test
