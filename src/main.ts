@@ -1,5 +1,5 @@
-import { getInput, getBooleanInput } from "@actions/core";
-import type { API } from "./api";
+import { getInput, getBooleanInput, isDebug } from "@actions/core";
+import type { API } from "./github";
 import editGitHubBlob from "./edit_github_blob";
 import { EditOptions } from "./edit_github_blob";
 import { removeRevisionLine, updateVersion } from "./replace_extension_toml";
@@ -63,7 +63,9 @@ export async function prepareEdit(
   const replacements = new Map<string, string>();
   replacements.set("version", version);
 
-  console.log("context", context);
+  if (isDebug()) {
+    console.log("context", context);
+  }
 
   const commitMessage = commitForRelease(messageTemplate, {
     owner: context.repo.owner,

@@ -1,4 +1,4 @@
-import type { API } from "./api";
+import type { API } from "./github";
 import { basename } from "path";
 import { updateRepo } from "./github";
 
