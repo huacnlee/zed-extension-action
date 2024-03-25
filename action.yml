@@ -14,13 +14,11 @@ inputs:
   commit-message:
     description: The git commit message template to use when updating the formula
     default: |
-      {{extensionName}} {{version}}
+      Update {{extensionName}} {{version}}
 
       Release notes:
 
       https://github.com/{{owner}}/{{repo}}/releases/tag/v{{version}}
-
-      > Created by [zed-extension-action](https://github.com/huacnlee/zed-extension-action).
   create-pullrequest:
     description: Set to a boolean value to either force or prohibit making a pull request to zed/extensions
   zed-extensions:
