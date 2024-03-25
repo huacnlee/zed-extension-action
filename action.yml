@@ -14,7 +14,7 @@ inputs:
   commit-message:
     description: The git commit message template to use when updating the formula
     default: |
-      Update {{extensionName}} {{version}}
+      Update {{extensionName}} to {{version}}
 
       Release notes:
 
