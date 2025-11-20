@@ -1,5 +1,6 @@
 import { getInput, getBooleanInput, isDebug } from "@actions/core";
 import type { API } from "./github";
+import { resolveRef } from "./github";
 import editGitHubBlob from "./edit_github_blob";
 import { EditOptions } from "./edit_github_blob";
 import { removeRevisionLine, updateVersion } from "./replace_extension_toml";
@@ -17,15 +18,33 @@ export default async function (api: (token: string) => API): Promise<void> {
 }
 
 export async function prepareEdit(
-  _sameRepoClient: API,
+  sameRepoClient: API,
   crossRepoClient: API,
 ): Promise<EditOptions> {
-  const tagName =
-    getInput("tag-name") ||
-    ((ref) => {
-      if (!ref.startsWith("refs/tags/")) throw `invalid ref: ${ref}`;
-      return ref.replace("refs/tags/", "");
-    })(context.ref);
+  // Get the tag to use
+  const inputTag = getInput("tag");
+  let resolvedSha: string;
+  let tagName: string;
+
+  if (inputTag) {
+    // Use the provided tag parameter
+    tagName = inputTag;
+    // Resolve the tag to get the commit SHA
+    const resolved = await resolveRef(
+      sameRepoClient,
+      context.repo.owner,
+      context.repo.repo,
+      tagName,
+    );
+    resolvedSha = resolved.sha;
+  } else {
+    // Fall back to context.ref and context.sha
+    if (!context.ref.startsWith("refs/tags/")) {
+      throw new Error(`invalid ref: ${context.ref}. Expected a tag reference when no tag is provided.`);
+    }
+    tagName = context.ref.replace("refs/tags/", "");
+    resolvedSha = context.sha;
+  }
 
   const [owner, repo] = getInput("zed-extensions", { required: true }).split(
     "/",
@@ -83,7 +102,7 @@ export async function prepareEdit(
     commitMessage,
     pushTo,
     makePR,
-    submoduleCommitSha: context.sha,
+    submoduleCommitSha: resolvedSha,
     replace(oldContent: string) {
       return removeRevisionLine(
         updateVersion(oldContent, extensionName, version),

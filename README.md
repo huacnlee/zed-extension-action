@@ -34,6 +34,26 @@ jobs:
 | `extension-name` | The name of your Zed extension.                              | `true`   | -                                |
 | `extension-path` | If you have a different path, you can set it.                | `false`  | `extensions/${ extension-name }` |
 | `push-to`        | The forked repository of the zed-industries/extensions repo. | `true`   | -                                |
+| `tag`            | Git tag name to use for the extension update                | `false`  | Currently pushed tag             |
+
+### Tag Support
+
+The `tag` parameter allows you to specify a specific git tag to use for the extension update:
+
+- **Tag names**: `v1.0.0` or `refs/tags/v1.0.0`
+
+When no `tag` parameter is provided, the action uses the currently pushed tag from the context.
+
+### Examples
+
+**Using a specific tag:**
+```yaml
+- uses: huacnlee/zed-extension-action@v1
+  with:
+    extension-name: your-extension-name
+    tag: v1.2.3
+    push-to: your-name/extensions
+```
 
 The `COMMITTER_TOKEN` is a personal access token with `repo` and `workflow` scopes. You can create one in your [GitHub settings](https://github.com/settings/tokens).
 

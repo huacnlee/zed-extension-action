@@ -41,6 +41,45 @@ export default function (
   });
 }
 
+/**
+ * Resolve a git tag reference to its commit SHA
+ * Handles tag names like "v1.0.0" or "refs/tags/v1.0.0"
+ */
+export async function resolveRef(
+  octokit: API,
+  owner: string,
+  repo: string,
+  tag: string,
+): Promise<{ sha: string; type: 'tag' }> {
+  // Handle full tag refs
+  if (tag.startsWith('refs/tags/')) {
+    const tagName = tag.replace('refs/tags/', '');
+    
+    try {
+      const { data } = await octokit.request("GET /repos/{owner}/{repo}/git/refs/{ref}", {
+        owner,
+        repo,
+        ref: `tags/${tagName}`,
+      });
+      return { sha: data.object.sha, type: 'tag' };
+    } catch (error) {
+      throw new Error(`Tag not found: ${tag}`);
+    }
+  }
+
+  // For bare tag names, look up as tag
+  try {
+    const { data } = await octokit.request("GET /repos/{owner}/{repo}/git/refs/{ref}", {
+      owner,
+      repo,
+      ref: `tags/${tag}`,
+    });
+    return { sha: data.object.sha, type: 'tag' };
+  } catch (error) {
+    throw new Error(`Tag not found: ${tag}`);
+  }
+}
+
 export async function createCommit(
   octokit: API,
   owner: string,
