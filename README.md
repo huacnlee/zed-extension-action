@@ -10,14 +10,14 @@ Create a `release.yml` file in `.github/workflows` directory with the following 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   homebrew:
     name: Release Zed Extension
     runs-on: ubuntu-latest
     steps:
-      - uses: huacnlee/zed-extension-action@v1
+      - uses: huacnlee/zed-extension-action@v2
         with:
           extension-name: your-extension-name
           # extension-path: extensions/${{ extension-name }}
@@ -34,7 +34,7 @@ jobs:
 | `extension-name` | The name of your Zed extension.                              | `true`   | -                                |
 | `extension-path` | If you have a different path, you can set it.                | `false`  | `extensions/${ extension-name }` |
 | `push-to`        | The forked repository of the zed-industries/extensions repo. | `true`   | -                                |
-| `tag`            | Git tag name to use for the extension update                | `false`  | Currently pushed tag             |
+| `tag`            | Git tag name to use for the extension update                 | `false`  | Currently pushed tag             |
 
 ### Tag Support
 
@@ -47,8 +47,9 @@ When no `tag` parameter is provided, the action uses the currently pushed tag fr
 ### Examples
 
 **Using a specific tag:**
+
 ```yaml
-- uses: huacnlee/zed-extension-action@v1
+- uses: huacnlee/zed-extension-action@v2
   with:
     extension-name: your-extension-name
     tag: v1.2.3
