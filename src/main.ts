@@ -3,9 +3,9 @@ import type { API } from "./github";
 import { resolveRef } from "./github";
 import editGitHubBlob from "./edit_github_blob";
 import { EditOptions } from "./edit_github_blob";
-import { removeRevisionLine, updateVersion } from "./replace_extension_toml";
+import { getExtensionSubmodulePath, removeRevisionLine, updateVersion } from "./extension_toml";
 import { context } from "@actions/github";
-import { commitForRelease, getExtensionPath } from "./utils";
+import { commitForRelease } from "./utils";
 
 export default async function (api: (token: string) => API): Promise<void> {
   const internalToken =
@@ -68,8 +68,6 @@ export async function prepareEdit(
   const extensionName =
     getInput("extension-name") || context.repo.repo.toLowerCase();
   const branch = getInput("base-branch");
-  const extensionPath =
-    getInput("extension-path") || getExtensionPath(extensionName);
   const version = tagName.replace(/^v(\d)/, "$1");
 
   const messageTemplate = getInput("commit-message", { required: true });
@@ -98,7 +96,7 @@ export async function prepareEdit(
     owner,
     repo,
     branch,
-    extensionPath,
+    extensionName,
     commitMessage,
     pushTo,
     makePR,
@@ -108,5 +106,8 @@ export async function prepareEdit(
         updateVersion(oldContent, extensionName, version),
       );
     },
+    getExtensionPath(toml: string) {
+      return getExtensionSubmodulePath(toml, extensionName)
+    }
   };
 }
