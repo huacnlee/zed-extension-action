@@ -30,7 +30,7 @@ export type EditOptions = {
   repo: string;
   extensionName: string;
   branch?: string;
-  
+  needsBranchName: string;
   apiClient: API;
   submoduleCommitSha: string;
   replace: (oldContent: string) => string;
@@ -81,8 +81,7 @@ export default async function (params: EditOptions): Promise<string> {
   }
 
   if (needsBranch) {
-    const timestamp = Math.round(Date.now() / 1000);
-    headBranch = `${extensionName}-${timestamp}`;
+    headBranch = params.needsBranchName;
     if (inFork) {
       try {
         await api.repos.mergeUpstream({

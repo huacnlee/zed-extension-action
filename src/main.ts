@@ -69,6 +69,7 @@ export async function prepareEdit(
     getInput("extension-name") || context.repo.repo.toLowerCase();
   const branch = getInput("base-branch");
   const version = tagName.replace(/^v(\d)/, "$1");
+  const needsBranchName = `${extensionName}-v${version}`;
 
   const messageTemplate = getInput("commit-message", { required: true });
 
@@ -97,6 +98,7 @@ export async function prepareEdit(
     repo,
     branch,
     extensionName,
+    needsBranchName,
     commitMessage,
     pushTo,
     makePR,
