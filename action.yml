@@ -18,7 +18,7 @@ inputs:
 
       Release notes:
 
-      https://github.com/{{owner}}/{{repo}}/releases/tag/v{{version}}
+      https://github.com/{{owner}}/{{repo}}/releases/tag/{{tagName}}
   create-pullrequest:
     description: Set to a boolean value to either force or prohibit making a pull request to zed/extensions
   zed-extensions:

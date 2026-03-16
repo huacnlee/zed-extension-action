@@ -3,14 +3,17 @@ import type { API } from "./github";
 import { resolveRef } from "./github";
 import editGitHubBlob from "./edit_github_blob";
 import { EditOptions } from "./edit_github_blob";
-import { getExtensionSubmodulePath, removeRevisionLine, updateVersion } from "./extension_toml";
+import {
+  getExtensionSubmodulePath,
+  removeRevisionLine,
+  updateVersion,
+} from "./extension_toml";
 import { context } from "@actions/github";
 import { commitForRelease } from "./utils";
 import { parseVersionFromTag } from "./version";
 
 export default async function (api: (token: string) => API): Promise<void> {
-  const internalToken =
-    process.env.GITHUB_TOKEN || process.env.COMMITTER_TOKEN || "";
+  const internalToken = process.env.GITHUB_TOKEN || process.env.COMMITTER_TOKEN || "";
   const externalToken = process.env.COMMITTER_TOKEN || "";
 
   const options = await prepareEdit(api(internalToken), api(externalToken));
@@ -41,15 +44,15 @@ export async function prepareEdit(
   } else {
     // Fall back to context.ref and context.sha
     if (!context.ref.startsWith("refs/tags/")) {
-      throw new Error(`invalid ref: ${context.ref}. Expected a tag reference when no tag is provided.`);
+      throw new Error(
+        `invalid ref: ${context.ref}. Expected a tag reference when no tag is provided.`,
+      );
     }
     tagName = context.ref.replace("refs/tags/", "");
     resolvedSha = context.sha;
   }
 
-  const [owner, repo] = getInput("zed-extensions", { required: true }).split(
-    "/",
-  );
+  const [owner, repo] = getInput("zed-extensions", { required: true }).split("/");
 
   let pushTo: { owner: string; repo: string } | undefined;
   const pushToSpec = getInput("push-to");
@@ -66,8 +69,7 @@ export async function prepareEdit(
     // doesn't have permissions to push to homebrew-tap, even though it does.
     pushTo = context.repo;
   }
-  const extensionName =
-    getInput("extension-name") || context.repo.repo.toLowerCase();
+  const extensionName = getInput("extension-name") || context.repo.repo.toLowerCase();
   const branch = getInput("base-branch");
   const version = parseVersionFromTag(tagName);
   const needsBranchName = `${extensionName}-v${version}`;
@@ -91,6 +93,7 @@ export async function prepareEdit(
     repo: context.repo.repo,
     extensionName,
     version,
+    tagName,
   });
 
   return {
@@ -105,12 +108,10 @@ export async function prepareEdit(
     makePR,
     submoduleCommitSha: resolvedSha,
     replace(oldContent: string) {
-      return removeRevisionLine(
-        updateVersion(oldContent, extensionName, version),
-      );
+      return removeRevisionLine(updateVersion(oldContent, extensionName, version));
     },
     getExtensionPath(toml: string) {
-      return getExtensionSubmodulePath(toml, extensionName)
-    }
+      return getExtensionSubmodulePath(toml, extensionName);
+    },
   };
 }
