@@ -6,6 +6,7 @@ import { EditOptions } from "./edit_github_blob";
 import { getExtensionSubmodulePath, removeRevisionLine, updateVersion } from "./extension_toml";
 import { context } from "@actions/github";
 import { commitForRelease } from "./utils";
+import { parseVersionFromTag } from "./version";
 
 export default async function (api: (token: string) => API): Promise<void> {
   const internalToken =
@@ -68,7 +69,7 @@ export async function prepareEdit(
   const extensionName =
     getInput("extension-name") || context.repo.repo.toLowerCase();
   const branch = getInput("base-branch");
-  const version = tagName.replace(/^v(\d)/, "$1");
+  const version = parseVersionFromTag(tagName);
   const needsBranchName = `${extensionName}-v${version}`;
 
   const messageTemplate = getInput("commit-message", { required: true });

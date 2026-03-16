@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 
-import { compare, fromUrl } from "./version";
+import { parseVersionFromTag, fromUrl } from "./version";
 
 test("fromUrl()", () => {
   const cases = new Map<string, string>([
@@ -32,17 +32,13 @@ test("fromUrl()", () => {
   }
 });
 
-test("compare()", () => {
-  expect(compare("v1.2.0", "v1.2.1")).toEqual(-1);
-  expect(compare("v1.2.0", "v1.1.9.0")).toEqual(1);
-  expect(compare("gping-v1.13", "gping-v1.14.0")).toEqual(-1);
-  expect(
-    compare("@smartthings/cli@1.7.0", "@smartthings/cli@1.7.0-rc2"),
-  ).toEqual(1);
-  expect(compare("@smartthings/cli@1.7.0", "@smartthings/cli@1.7.0")).toEqual(
-    0,
-  );
-  expect(compare("@smartthings/cli@1.7.0", "@smartthings/cli@1.10.0")).toEqual(
-    -1,
-  );
+test("parse()", () => {
+  expect(parseVersionFromTag("v1.2.0")).toEqual("1.2.0");
+  expect(parseVersionFromTag("v123.456.789")).toEqual("123.456.789");
+  expect(parseVersionFromTag("v123.456.789-beta")).toEqual("123.456.789");
+  expect(parseVersionFromTag("v1.2.0-beta")).toEqual("1.2.0");
+  expect(parseVersionFromTag("v1.2.0-beta.2")).toEqual("1.2.0");
+  expect(parseVersionFromTag("html-v1.2.0")).toEqual("1.2.0");
+  expect(parseVersionFromTag("gping-v1.13")).toEqual("1.13");
+  expect(parseVersionFromTag("@smartthings/cli@1.7.0")).toEqual("1.7.0");
 });

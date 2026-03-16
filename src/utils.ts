@@ -15,7 +15,3 @@ export function commitForRelease(
     },
   );
 }
-
-export function getExtensionPath(extensionName: string): string {
-  return `extensions/${extensionName}`;
-}
