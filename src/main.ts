@@ -92,8 +92,8 @@ export async function prepareEdit(
     owner: context.repo.owner,
     repo: context.repo.repo,
     extensionName,
-    version,
     tag: tagName,
+    version,
   });
 
   return {
