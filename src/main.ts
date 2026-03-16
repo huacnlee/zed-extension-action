@@ -1,4 +1,4 @@
-import { getInput, getBooleanInput, isDebug } from "@actions/core";
+import { getInput, getBooleanInput, isDebug, setOutput } from "@actions/core";
 import type { API } from "./github";
 import { resolveRef } from "./github";
 import editGitHubBlob from "./edit_github_blob";
@@ -17,8 +17,10 @@ export default async function (api: (token: string) => API): Promise<void> {
   const externalToken = process.env.COMMITTER_TOKEN || "";
 
   const options = await prepareEdit(api(internalToken), api(externalToken));
-  const createdUrl = await editGitHubBlob(options);
-  console.log(createdUrl);
+  const createdPullRequest = await editGitHubBlob(options);
+
+  setOutput("pull-request-number", createdPullRequest?.pullRequestNumber);
+  console.log(createdPullRequest?.url);
 }
 
 export async function prepareEdit(

@@ -43,7 +43,12 @@ export type EditOptions = {
   makePR?: boolean;
 };
 
-export default async function (params: EditOptions): Promise<string> {
+export type EditResult = {
+  pullRequestNumber: number;
+  url: string;
+};
+
+export default async function (params: EditOptions): Promise<EditResult | undefined> {
   const baseRepo = {
     owner: params.owner,
     repo: params.repo,
@@ -153,8 +158,11 @@ export default async function (params: EditOptions): Promise<string> {
       title,
       body,
     });
-    return prRes.data.html_url;
+    return {
+      pullRequestNumber: prRes.data.number,
+      url: prRes.data.html_url,
+    };
   } else {
-    return "";
+    return undefined;
   }
 }
