@@ -93,7 +93,7 @@ export async function prepareEdit(
     repo: context.repo.repo,
     extensionName,
     version,
-    tagName,
+    tag: tagName,
   });
 
   return {
