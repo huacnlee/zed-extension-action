@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { updateVersion } from "./replace_extension_toml";
+import { getExtensionSubmodulePath, updateVersion } from "./extension_toml";
 
 test("updateVersion", () => {
   let raw = `
@@ -63,3 +63,25 @@ test("updateVersion", () => {
   `);
 
 });
+
+test("getExtensonSubmodulePath", () => {
+  let raw = `
+  [assembly]
+  version = "0.0.1"
+  submodule = "extensions/assembly"
+
+  [beancount]
+  submodule = "extensions/beancount"
+  version = "0.0.1"
+  
+  [clojure]
+  submodule = "extensions/zed"
+  path = "extensions/clojure"
+  version = "3.2.1"
+  `;
+
+  expect(getExtensionSubmodulePath(raw, "beancount")).toEqual("extensions/beancount");
+  expect(getExtensionSubmodulePath(raw, "assembly")).toEqual("extensions/assembly");
+  expect(getExtensionSubmodulePath(raw, "clojure")).toEqual("extensions/zed");
+});
+

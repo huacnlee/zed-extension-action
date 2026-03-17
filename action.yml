@@ -18,7 +18,7 @@ inputs:
 
       Release notes:
 
-      https://github.com/{{owner}}/{{repo}}/releases/tag/v{{version}}
+      https://github.com/{{owner}}/{{repo}}/releases/tag/{{tag}}
   create-pullrequest:
     description: Set to a boolean value to either force or prohibit making a pull request to zed/extensions
   zed-extensions:
@@ -26,6 +26,9 @@ inputs:
     default: zed-industries/extensions
   push-to:
     description: An existing fork of the homebrew-tap repository where the edit should be pushed to (defaults to creating or reusing a personal fork)
+outputs:
+  pull-request-number:
+    description: "The number of the pull request that was created"
 branding:
   icon: box
   color: orange

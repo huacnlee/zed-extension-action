@@ -1,5 +1,4 @@
 import type { API } from "./github";
-import { basename } from "path";
 import { updateRepo } from "./github";
 
 // avoid importing @octokit/request-error to not have to keep it in sync in package.json
@@ -29,11 +28,13 @@ async function retry<T>(
 export type EditOptions = {
   owner: string;
   repo: string;
-  extensionPath: string;
+  extensionName: string;
   branch?: string;
+  needsBranchName: string;
   apiClient: API;
   submoduleCommitSha: string;
   replace: (oldContent: string) => string;
+  getExtensionPath: (tomlContent: string) => string;
   commitMessage?: string;
   pushTo?: {
     owner: string;
@@ -42,13 +43,18 @@ export type EditOptions = {
   makePR?: boolean;
 };
 
-export default async function (params: EditOptions): Promise<string> {
+export type EditResult = {
+  pullRequestNumber: number;
+  url: string;
+};
+
+export default async function (params: EditOptions): Promise<EditResult | undefined> {
   const baseRepo = {
     owner: params.owner,
     repo: params.repo,
   };
   let headRepo = params.pushTo == null ? baseRepo : params.pushTo;
-  const extensionPath = params.extensionPath;
+  const extensionName = params.extensionName;
   const api = params.apiClient.rest;
 
   const repoRes = await api.repos.get(baseRepo);
@@ -60,16 +66,13 @@ export default async function (params: EditOptions): Promise<string> {
     `${baseRepo.owner}/${baseRepo.repo}`.toLowerCase() !=
       `${headRepo.owner}/${headRepo.repo}`.toLowerCase();
 
-  const baseBranch = params.branch
-    ? params.branch
-    : repoRes.data.default_branch;
+  const baseBranch = params.branch ? params.branch : repoRes.data.default_branch;
   let headBranch = baseBranch;
   const branchRes = await api.repos.getBranch({
     ...baseRepo,
     branch: baseBranch,
   });
-  const needsBranch =
-    inFork || branchRes.data.protected || params.makePR === true;
+  const needsBranch = inFork || branchRes.data.protected || params.makePR === true;
 
   if (makeFork) {
     const res = await Promise.all([
@@ -83,8 +86,7 @@ export default async function (params: EditOptions): Promise<string> {
   }
 
   if (needsBranch) {
-    const timestamp = Math.round(Date.now() / 1000);
-    headBranch = `update-${basename(extensionPath)}-${timestamp}`;
+    headBranch = params.needsBranchName;
     if (inFork) {
       try {
         await api.repos.mergeUpstream({
@@ -127,9 +129,11 @@ export default async function (params: EditOptions): Promise<string> {
     throw new Error("no replacements ocurred");
   }
 
+  let extensionPath = params.getExtensionPath(oldContent);
+
   const commitMessage = params.commitMessage
     ? params.commitMessage
-    : `Update ${extensionPath}`;
+    : `Update ${extensionName}`;
 
   await updateRepo({
     octokit: params.apiClient,
@@ -154,8 +158,11 @@ export default async function (params: EditOptions): Promise<string> {
       title,
       body,
     });
-    return prRes.data.html_url;
+    return {
+      pullRequestNumber: prRes.data.number,
+      url: prRes.data.html_url,
+    };
   } else {
-    return "";
+    return undefined;
   }
 }

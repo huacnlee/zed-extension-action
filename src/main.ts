@@ -1,20 +1,26 @@
-import { getInput, getBooleanInput, isDebug } from "@actions/core";
+import { getInput, getBooleanInput, isDebug, setOutput } from "@actions/core";
 import type { API } from "./github";
 import { resolveRef } from "./github";
 import editGitHubBlob from "./edit_github_blob";
 import { EditOptions } from "./edit_github_blob";
-import { removeRevisionLine, updateVersion } from "./replace_extension_toml";
+import {
+  getExtensionSubmodulePath,
+  removeRevisionLine,
+  updateVersion,
+} from "./extension_toml";
 import { context } from "@actions/github";
-import { commitForRelease, getExtensionPath } from "./utils";
+import { commitForRelease } from "./utils";
+import { parseVersionFromTag } from "./version";
 
 export default async function (api: (token: string) => API): Promise<void> {
-  const internalToken =
-    process.env.GITHUB_TOKEN || process.env.COMMITTER_TOKEN || "";
+  const internalToken = process.env.GITHUB_TOKEN || process.env.COMMITTER_TOKEN || "";
   const externalToken = process.env.COMMITTER_TOKEN || "";
 
   const options = await prepareEdit(api(internalToken), api(externalToken));
-  const createdUrl = await editGitHubBlob(options);
-  console.log(createdUrl);
+  const createdPullRequest = await editGitHubBlob(options);
+
+  setOutput("pull-request-number", createdPullRequest?.pullRequestNumber);
+  console.log(createdPullRequest?.url);
 }
 
 export async function prepareEdit(
@@ -40,15 +46,15 @@ export async function prepareEdit(
   } else {
     // Fall back to context.ref and context.sha
     if (!context.ref.startsWith("refs/tags/")) {
-      throw new Error(`invalid ref: ${context.ref}. Expected a tag reference when no tag is provided.`);
+      throw new Error(
+        `invalid ref: ${context.ref}. Expected a tag reference when no tag is provided.`,
+      );
     }
     tagName = context.ref.replace("refs/tags/", "");
     resolvedSha = context.sha;
   }
 
-  const [owner, repo] = getInput("zed-extensions", { required: true }).split(
-    "/",
-  );
+  const [owner, repo] = getInput("zed-extensions", { required: true }).split("/");
 
   let pushTo: { owner: string; repo: string } | undefined;
   const pushToSpec = getInput("push-to");
@@ -65,12 +71,10 @@ export async function prepareEdit(
     // doesn't have permissions to push to homebrew-tap, even though it does.
     pushTo = context.repo;
   }
-  const extensionName =
-    getInput("extension-name") || context.repo.repo.toLowerCase();
+  const extensionName = getInput("extension-name") || context.repo.repo.toLowerCase();
   const branch = getInput("base-branch");
-  const extensionPath =
-    getInput("extension-path") || getExtensionPath(extensionName);
-  const version = tagName.replace(/^v(\d)/, "$1");
+  const version = parseVersionFromTag(tagName);
+  const needsBranchName = `${extensionName}-v${version}`;
 
   const messageTemplate = getInput("commit-message", { required: true });
 
@@ -90,6 +94,7 @@ export async function prepareEdit(
     owner: context.repo.owner,
     repo: context.repo.repo,
     extensionName,
+    tag: tagName,
     version,
   });
 
@@ -98,15 +103,17 @@ export async function prepareEdit(
     owner,
     repo,
     branch,
-    extensionPath,
+    extensionName,
+    needsBranchName,
     commitMessage,
     pushTo,
     makePR,
     submoduleCommitSha: resolvedSha,
     replace(oldContent: string) {
-      return removeRevisionLine(
-        updateVersion(oldContent, extensionName, version),
-      );
+      return removeRevisionLine(updateVersion(oldContent, extensionName, version));
+    },
+    getExtensionPath(toml: string) {
+      return getExtensionSubmodulePath(toml, extensionName);
     },
   };
 }

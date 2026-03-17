@@ -20,7 +20,6 @@ jobs:
       - uses: huacnlee/zed-extension-action@v2
         with:
           extension-name: your-extension-name
-          # extension-path: extensions/${{ extension-name }}
           push-to: your-name/extensions
         env:
           # the personal access token should have "repo" & "workflow" scopes
@@ -32,7 +31,6 @@ jobs:
 | Name             | Description                                                  | Required | Default                          |
 | ---------------- | ------------------------------------------------------------ | -------- | -------------------------------- |
 | `extension-name` | The name of your Zed extension.                              | `true`   | -                                |
-| `extension-path` | If you have a different path, you can set it.                | `false`  | `extensions/${ extension-name }` |
 | `push-to`        | The forked repository of the zed-industries/extensions repo. | `true`   | -                                |
 | `tag`            | Git tag name to use for the extension update                 | `false`  | Currently pushed tag             |
 
